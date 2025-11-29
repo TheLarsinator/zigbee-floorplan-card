@@ -1,0 +1,7 @@
+{
+  "name": "Zigbee Floorplan Card",
+  "content_in_root": true,
+  "filename": "zigbee-floorplan-card.js",
+  "render_readme": true,
+  "homeassistant": "2023.1.0"
+}

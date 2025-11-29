@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coordinate Picker for Zigbee Floorplan</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .image-container {
+            position: relative;
+            display: inline-block;
+            border: 2px solid #ddd;
+            background: #fafafa;
+        }
+        #floorplan {
+            display: block;
+            max-width: 100%;
+            cursor: crosshair;
+        }
+        .coordinate-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .coordinate-display h3 {
+            margin-top: 0;
+        }
+        .device-entry {
+            background: white;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .upload-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 4px;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        input[type="text"] {
+            padding: 5px;
+            width: 300px;
+            margin: 5px;
+        }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976D2;
+        }
+        .marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .marker.coordinator {
+            background: rgba(255, 0, 0, 0.7);
+            border-color: #990000;
+        }
+        .marker.router {
+            background: rgba(0, 102, 255, 0.7);
+            border-color: #003399;
+        }
+        .marker.end-device {
+            background: rgba(0, 204, 0, 0.7);
+            border-color: #006600;
+        }
+        .output-section {
+            margin-top: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 300px;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .type-selector {
+            margin: 10px 0;
+        }
+        select {
+            padding: 5px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Zigbee Floorplan Coordinate Picker</h1>
+        
+        <div class="instructions">
+            <h3>Instructions:</h3>
+            <ol>
+                <li>Upload your floorplan image using the button below</li>
+                <li>Enter a device IEEE address and select its type</li>
+                <li>Click on the image where the device is located</li>
+                <li>Repeat for all devices</li>
+                <li>Copy the generated YAML configuration at the bottom</li>
+            </ol>
+        </div>
+
+        <div class="upload-section">
+            <h3>Upload Floorplan Image</h3>
+            <input type="file" id="imageUpload" accept="image/*">
+            <div>
+                <label>Image width (pixels): <input type="number" id="imageWidth" value="1000"></label>
+                <label>Image height (pixels): <input type="number" id="imageHeight" value="800"></label>
+            </div>
+        </div>
+
+        <div class="upload-section">
+            <h3>Add Device</h3>
+            <div>
+                <input type="text" id="deviceAddress" placeholder="Device IEEE Address (e.g., 0xbc026efffe29c7de)">
+                <input type="text" id="deviceName" placeholder="Friendly name (optional)">
+                <div class="type-selector">
+                    <label>Device type:</label>
+                    <select id="deviceType">
+                        <option value="coordinator">Coordinator (Red)</option>
+                        <option value="router" selected>Router (Blue)</option>
+                        <option value="end-device">End Device (Green)</option>
+                    </select>
+                </div>
+                <button onclick="setActiveDevice()">Set as Active Device</button>
+                <button onclick="clearDevices()">Clear All Devices</button>
+            </div>
+            <div id="activeDevice" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+
+        <div class="image-container" id="imageContainer" style="display: none;">
+            <img id="floorplan" alt="Click to upload an image">
+        </div>
+
+        <div class="coordinate-display">
+            <h3>Devices Added:</h3>
+            <div id="deviceList"></div>
+        </div>
+
+        <div class="output-section">
+            <h3>Generated YAML Configuration:</h3>
+            <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+            <textarea id="yamlOutput" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        let devices = [];
+        let activeDevice = null;
+        let imageScale = 1;
+
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.getElementById('floorplan');
+                    img.src = event.target.result;
+                    document.getElementById('imageContainer').style.display = 'inline-block';
+                    
+                    img.onload = function() {
+                        const actualWidth = img.naturalWidth;
+                        const actualHeight = img.naturalHeight;
+                        document.getElementById('imageWidth').value = actualWidth;
+                        document.getElementById('imageHeight').value = actualHeight;
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('floorplan').addEventListener('click', function(e) {
+            if (!activeDevice) {
+                alert('Please set an active device first by entering its IEEE address and clicking "Set as Active Device"');
+                return;
+            }
+
+            const rect = this.getBoundingClientRect();
+            const scaleX = this.naturalWidth / rect.width;
+            const scaleY = this.naturalHeight / rect.height;
+            
+            const x = Math.round((e.clientX - rect.left) * scaleX);
+            const y = Math.round((e.clientY - rect.top) * scaleY);
+
+            // Add device to list
+            devices.push({
+                address: activeDevice.address,
+                name: activeDevice.name,
+                type: activeDevice.type,
+                x: x,
+                y: y
+            });
+
+            // Add visual marker
+            const marker = document.createElement('div');
+            marker.className = `marker ${activeDevice.type}`;
+            marker.style.left = (e.clientX - rect.left) + 'px';
+            marker.style.top = (e.clientY - rect.top) + 'px';
+            document.getElementById('imageContainer').appendChild(marker);
+
+            updateDisplay();
+            activeDevice = null;
+            document.getElementById('activeDevice').textContent = '';
+            document.getElementById('deviceAddress').value = '';
+            document.getElementById('deviceName').value = '';
+        });
+
+        function setActiveDevice() {
+            const address = document.getElementById('deviceAddress').value.trim();
+            const name = document.getElementById('deviceName').value.trim();
+            const type = document.getElementById('deviceType').value;
+
+            if (!address) {
+                alert('Please enter a device IEEE address');
+                return;
+            }
+
+            activeDevice = { address, name, type };
+            document.getElementById('activeDevice').textContent = 
+                `Active: ${name || address} (${type}) - Click on the floorplan to place it`;
+        }
+
+        function clearDevices() {
+            if (confirm('Are you sure you want to clear all devices?')) {
+                devices = [];
+                // Remove all markers
+                const markers = document.querySelectorAll('.marker');
+                markers.forEach(m => m.remove());
+                updateDisplay();
+            }
+        }
+
+        function updateDisplay() {
+            // Update device list
+            const listDiv = document.getElementById('deviceList');
+            if (devices.length === 0) {
+                listDiv.innerHTML = '<p>No devices added yet. Add a device and click on the floorplan.</p>';
+            } else {
+                listDiv.innerHTML = devices.map(d => `
+                    <div class="device-entry">
+                        <strong>${d.name || d.address}</strong> (${d.type})<br>
+                        IEEE: ${d.address}<br>
+                        Coordinates: x=${d.x}, y=${d.y}
+                    </div>
+                `).join('');
+            }
+
+            // Generate YAML
+            const width = document.getElementById('imageWidth').value;
+            const height = document.getElementById('imageHeight').value;
+            
+            let yaml = `type: custom:zigbee-floorplan-card
+entity: sensor.zigbee2mqtt_networkmap
+image: /local/floorplan.png  # Change to your image path
+image_width: ${width}
+image_height: ${height}
+circle_radius: 10
+show_labels: true
+show_link_lqi: false
+mqtt_base_topic: zigbee2mqtt
+
+# Device coordinates
+device_coordinates:\n`;
+            devices.forEach(d => {
+                yaml += `  '${d.address}':\n    x: ${d.x}\n    y: ${d.y}\n`;
+            });
+
+            document.getElementById('yamlOutput').value = yaml;
+        }
+
+        function copyToClipboard() {
+            const textarea = document.getElementById('yamlOutput');
+            textarea.select();
+            document.execCommand('copy');
+            alert('Configuration copied to clipboard!');
+        }
+    </script>
+</body>
+</html>

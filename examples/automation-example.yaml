@@ -1,0 +1,32 @@
+# Automation to Request Zigbee Network Map
+
+# Add this to your Home Assistant configuration.yaml or automations.yaml
+
+automation:
+  - id: request_zigbee_network_map
+    alias: "Request Zigbee Network Map"
+    description: "Periodically requests the Zigbee network map from Zigbee2MQTT"
+    
+    trigger:
+      # Request every 5 minutes
+      - platform: time_pattern
+        minutes: "/5"
+      
+      # Request on Home Assistant start
+      - platform: homeassistant
+        event: start
+      
+      # Request when card loads (optional - when entity state changes)
+      - platform: state
+        entity_id: sensor.zigbee2mqtt_networkmap
+    
+    action:
+      - service: mqtt.publish
+        data:
+          topic: zigbee2mqtt/bridge/request/networkmap
+          payload: '{"type": "raw", "routes": true}'
+          retain: false
+
+# Alternative: If you use a custom Zigbee2MQTT base topic
+# Replace 'zigbee2mqtt' with your custom topic in the line above:
+# topic: YOUR_CUSTOM_TOPIC/bridge/request/networkmap

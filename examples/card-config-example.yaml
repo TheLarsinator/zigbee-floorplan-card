@@ -1,0 +1,109 @@
+# Example configuration for the Zigbee Floorplan Card
+# Add this to your Lovelace dashboard
+
+type: custom:zigbee-floorplan-card
+entity: sensor.zigbee_coordinator_networkmap  # Your Zigbee network map entity (required)
+image: /local/floorplan.png  # Path to your floorplan image (required)
+image_width: 1000  # Width of your image in pixels (optional, default: 1000)
+image_height: 800  # Height of your image in pixels (optional, default: 800)
+circle_radius: 10  # Radius of device circles (optional, default: 10)
+show_labels: true  # Show device labels (optional, default: true)
+show_link_lqi: false  # Show link quality indicator (LQI value) on connections (optional, default: false)
+mqtt_base_topic: zigbee2mqtt  # MQTT base topic for Zigbee2MQTT (optional, default: 'zigbee2mqtt')
+
+# Friendly names for devices (optional - overrides auto-lookup)
+# The card automatically uses friendly names from the Zigbee2MQTT network map data.
+# Only add entries here if you want to override specific device names.
+# Use IEEE addresses (lowercase) as keys.
+friendly_names:
+  '0xbc026efffe29c7de': 'Main Coordinator'
+  '0x001788010d5caf75': 'Living Room Router'
+  '0x881a14fffefeab2d': 'Kitchen Router'
+
+# Device coordinates (x, y in pixels) - REQUIRED
+# Map each device's IEEE address to its position on your floorplan image.
+# Use lowercase for IEEE addresses to match the code's normalization.
+device_coordinates:
+  # Coordinator (center of house)
+  '0xbc026efffe29c7de':
+    x: 500
+    y: 400
+  
+  # Routers (distributed throughout)
+  '0x001788010d5caf75':
+    x: 200
+    y: 200
+  '0x881a14fffefeab2d':
+    x: 800
+    y: 200
+  '0x8c65a3fffe1050a0':
+    x: 200
+    y: 600
+  '0x0017880109a34013':
+    x: 800
+    y: 600
+  '0x8c65a3fffec8e3fb':
+    x: 500
+    y: 200
+  '0x001788010ba7a48f':
+    x: 500
+    y: 600
+  '0x001788010d5cb6d8':
+    x: 300
+    y: 400
+  '0xe0798dfffe6d8237':
+    x: 700
+    y: 400
+  '0x70c59cfffef07c24':
+    x: 350
+    y: 300
+  '0x001788010ba816d0':
+    x: 650
+    y: 300
+  '0x44e2f8fffe0acfb2':
+    x: 350
+    y: 500
+  '0x7cc6b6fffeb27cf0':
+    x: 650
+    y: 500
+  '0x94a081fffe4e9f10':
+    x: 150
+    y: 350
+  '0x94a081fffebad317':
+    x: 850
+    y: 350
+  '0xecf64cfffef448da':
+    x: 250
+    y: 450
+  '0x881a14fffefe6174':
+    x: 750
+    y: 450
+  '0x001788010ba7fe99':
+    x: 400
+    y: 250
+  '0x881a14fffefe6043':
+    x: 600
+    y: 250
+  '0x7cc6b6fffebe40fd':
+    x: 400
+    y: 550
+  '0x8c8b48fffe227c1f':
+    x: 600
+    y: 550
+  
+  # End devices (sensors, switches, etc.)
+  '0xb43a45fffe8a2f28':
+    x: 150
+    y: 150
+  '0xe4b323fffeb59e74':
+    x: 850
+    y: 150
+  '0xd44867fffefc8124':
+    x: 150
+    y: 650
+  '0xf84477fffe790717':
+    x: 850
+    y: 650
+  '0x94deb8fffe3f5060':
+    x: 500
+    y: 100

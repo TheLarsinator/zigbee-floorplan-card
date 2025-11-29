@@ -1,0 +1,115 @@
+# Complete Home Assistant Configuration Example
+# This shows all the pieces needed to use the Zigbee Floorplan Card with MQTT
+
+# ============================================================================
+# STEP 1: MQTT Sensor Configuration
+# Add this to your configuration.yaml
+# ============================================================================
+
+mqtt:
+  sensor:
+    - name: Zigbee2mqtt Networkmap
+      # Change 'zigbee2mqtt' if you use a custom base_topic
+      state_topic: zigbee2mqtt/bridge/response/networkmap
+      value_template: >-
+        {{ now().strftime('%Y-%m-%d %H:%M:%S') }}
+      json_attributes_topic: zigbee2mqtt/bridge/response/networkmap
+      json_attributes_template: "{{ value_json.data.value | tojson }}"
+
+# ============================================================================
+# STEP 2: Automation to Request Network Map
+# Add this to your configuration.yaml or automations.yaml
+# ============================================================================
+
+automation:
+  - id: request_zigbee_network_map
+    alias: "Request Zigbee Network Map"
+    description: "Requests the Zigbee network map from Zigbee2MQTT once per day"
+    
+    trigger:
+      # Request once per day at midnight
+      - platform: time
+        at: "00:00:00"
+      
+      # Request on Home Assistant start
+      - platform: homeassistant
+        event: start
+    
+    action:
+      - service: mqtt.publish
+        data:
+          topic: zigbee2mqtt/bridge/request/networkmap
+          payload: '{"type": "raw", "routes": true}'
+
+# ============================================================================
+# STEP 3: Lovelace Dashboard Card Configuration
+# Add this to your dashboard (either via UI or in ui-lovelace.yaml)
+# ============================================================================
+
+# Basic configuration
+type: custom:zigbee-floorplan-card
+entity: sensor.zigbee2mqtt_networkmap
+image: /local/floorplan.png
+device_coordinates:
+  # Replace these IEEE addresses with your actual device addresses
+  "0x00124b001234abcd": { x: 500, y: 400 }  # Coordinator
+  "0x00124b005678efgh": { x: 300, y: 200 }  # Living Room Light
+  "0x00124b009abcdef0": { x: 700, y: 300 }  # Bedroom Sensor
+
+# ============================================================================
+# FULL CONFIGURATION WITH ALL OPTIONS
+# ============================================================================
+
+type: custom:zigbee-floorplan-card
+
+# Required settings
+entity: sensor.zigbee2mqtt_networkmap
+image: /local/floorplan.png
+device_coordinates:
+  "0x00124b001234abcd": { x: 500, y: 400 }
+  "0x00124b005678efgh": { x: 300, y: 200 }
+  "0x00124b009abcdef0": { x: 700, y: 300 }
+
+# Optional settings
+image_width: 1000          # Width of the floorplan image in pixels (default: 1000)
+image_height: 800          # Height of the floorplan image in pixels (default: 800)
+circle_radius: 10          # Radius of device circles (default: 10)
+show_labels: true          # Show device names (default: true)
+show_link_lqi: false       # Show link quality numbers on connections (default: false)
+mqtt_base_topic: zigbee2mqtt  # Zigbee2MQTT base topic (default: 'zigbee2mqtt')
+
+# Manual friendly name overrides (optional)
+# These will override the names from Zigbee2MQTT
+friendly_names:
+  "0x00124b005678efgh": "Living Room Light"
+  "0x00124b009abcdef0": "Master Bedroom Sensor"
+
+# ============================================================================
+# NOTES
+# ============================================================================
+
+# 1. Getting IEEE Addresses:
+#    - Check Developer Tools → States → Your Zigbee entity
+#    - Or check Zigbee2MQTT web interface
+#    - Or look in Zigbee2MQTT logs
+
+# 2. Coordinate Mapping:
+#    - Use the coordinate-picker.html tool (included in the card files)
+#    - x coordinate: 0 (left) to image_width (right)
+#    - y coordinate: 0 (top) to image_height (bottom)
+
+# 3. Device Colors (automatic):
+#    - Red: Coordinator
+#    - Blue: Router devices
+#    - Green: End devices
+
+# 4. Link Colors (based on LQI):
+#    - Green: Excellent (200-255)
+#    - Yellow-Green: Good (150-199)
+#    - Orange: Fair (100-149)
+#    - Red: Poor (0-99)
+
+# 5. Friendly Names Priority:
+#    - First: Manual override in 'friendly_names' config
+#    - Second: Zigbee2MQTT friendly_name from network map
+#    - Fallback: Last 4 characters of IEEE address
