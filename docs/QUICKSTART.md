@@ -41,18 +41,21 @@ mqtt:
 Add this to `configuration.yaml` or `automations.yaml`:
 
 ```yaml
-automation:
-  - alias: "Request Zigbee Network Map"
-    trigger:
-      - platform: time
-        at: "00:00:00"  # Once per day at midnight
-      - platform: homeassistant
-        event: start
-    action:
-      - service: mqtt.publish
-        data:
-          topic: zigbee2mqtt/bridge/request/networkmap
-          payload: '{"type": "raw", "routes": true}'
+- id: 'xxxxxxxxxx'
+  alias: Request Zigbee Network Map
+  description: 'Request Zigbee network map daily and on HA start'
+  triggers:
+    - trigger: time
+      at: "00:00:00"
+    - trigger: homeassistant
+      event: start
+  conditions: []
+  actions:
+    - service: mqtt.publish
+      data:
+        topic: zigbee2mqtt/bridge/request/networkmap
+        payload: '{"type": "raw", "routes": true}'
+  mode: single
 ```
 
 ## Step 4: Restart and Verify (3 minutes)
