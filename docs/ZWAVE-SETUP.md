@@ -128,7 +128,7 @@ def update_zwave_device_list():
     devices.sort(key=lambda d: d["node_id"])
 
     if controller_id is None:
-        controller_id = 1  # Default assumption
+        controller_id = 1  # Z-Wave JS convention: the controller is always node 1
 
     # Build links from LWR (Last Working Route) data
     links = []
