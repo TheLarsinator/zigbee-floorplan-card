@@ -11,31 +11,26 @@ show_labels: true  # Show device labels (optional, default: true)
 show_link_lqi: false  # Show link quality indicator (LQI value) on connections (optional, default: false)
 mqtt_base_topic: zigbee2mqtt  # MQTT base topic for Zigbee2MQTT (optional, default: 'zigbee2mqtt')
 
-# Friendly names for devices (optional - overrides auto-lookup)
-# The card automatically uses friendly names from the Zigbee2MQTT network map data.
-# Only add entries here if you want to override specific device names.
-# Use IEEE addresses (lowercase) as keys.
-friendly_names:
-  '0xbc026efffe29c7de': 'Main Coordinator'
-  '0x001788010d5caf75': 'Living Room Router'
-  '0x881a14fffefeab2d': 'Kitchen Router'
-
 # Device coordinates (x, y in pixels) - REQUIRED
 # Map each device's IEEE address to its position on your floorplan image.
 # Use lowercase for IEEE addresses to match the code's normalization.
-device_coordinates:
+# Add an optional 'name' field to override the auto-detected friendly name.
+devices:
   # Coordinator (center of house)
   '0xbc026efffe29c7de':
     x: 500
     y: 400
+    name: 'Main Coordinator'
   
   # Routers (distributed throughout)
   '0x001788010d5caf75':
     x: 200
     y: 200
+    name: 'Living Room Router'
   '0x881a14fffefeab2d':
     x: 800
     y: 200
+    name: 'Kitchen Router'
   '0x8c65a3fffe1050a0':
     x: 200
     y: 600

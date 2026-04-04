@@ -50,7 +50,7 @@ automation:
 type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
-device_coordinates:
+devices:
   # Replace these IEEE addresses with your actual device addresses
   "0x00124b001234abcd": { x: 500, y: 400 }  # Coordinator
   "0x00124b005678efgh": { x: 300, y: 200 }  # Living Room Light
@@ -65,7 +65,7 @@ type: custom:zigbee-floorplan-card
 # Required settings
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
-device_coordinates:
+devices:
   "0x00124b001234abcd": { x: 500, y: 400 }
   "0x00124b005678efgh": { x: 300, y: 200 }
   "0x00124b009abcdef0": { x: 700, y: 300 }

@@ -154,7 +154,7 @@ Minimal configuration:
 type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
-device_coordinates:
+devices:
   '0xYOURDEVICEADDRESS':
     x: 500
     y: 400
@@ -174,7 +174,7 @@ show_link_lqi: false  # Show LQI numbers on connections (default: false)
 mqtt_base_topic: zigbee2mqtt
 friendly_names:  # Optional overrides
   '0xbc026efffe29c7de': 'Main Coordinator'
-device_coordinates:
+devices:
   '0xbc026efffe29c7de':
     x: 500
     y: 400

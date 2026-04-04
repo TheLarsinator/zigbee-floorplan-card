@@ -20,8 +20,8 @@ class ZigbeeFloorplanCard extends HTMLElement {
     if (!config.image) {
       throw new Error('You need to define an image');
     }
-    if (!config.device_coordinates) {
-      throw new Error('You need to define device_coordinates');
+    if (!config.devices) {
+      throw new Error('You need to define devices');
     }
     
     // Validate and sanitize config values
@@ -32,13 +32,12 @@ class ZigbeeFloorplanCard extends HTMLElement {
     this._config = {
       entity: this._sanitizeString(config.entity),
       image: this._sanitizeUrl(config.image),
-      device_coordinates: config.device_coordinates,
+      devices: config.devices,
       image_width: imageWidth,
       image_height: imageHeight,
       circle_radius: circleRadius,
       show_labels: config.show_labels !== false,
       show_link_lqi: config.show_link_lqi === true,
-      friendly_names: config.friendly_names || {},
       mqtt_base_topic: this._sanitizeString(config.mqtt_base_topic || 'zigbee2mqtt')
     };
   }
@@ -544,8 +543,8 @@ class ZigbeeFloorplanCard extends HTMLElement {
       }
       processedLinks.add(linkKey);
 
-      const sourceCoords = this._config.device_coordinates[sourceAddr];
-      const targetCoords = this._config.device_coordinates[targetAddr];
+      const sourceCoords = this._config.devices[sourceAddr];
+      const targetCoords = this._config.devices[targetAddr];
 
       if (sourceCoords && targetCoords) {
         const lqi = link.lqi || link.linkquality || 0;
@@ -600,9 +599,9 @@ class ZigbeeFloorplanCard extends HTMLElement {
 
     nodes.forEach(node => {
       const ieeeAddr = node.ieeeAddr;
-      const coords = this._config.device_coordinates[ieeeAddr];
+      const device = this._config.devices[ieeeAddr];
       
-      if (coords) {
+      if (device) {
         const deviceType = node.type || 'EndDevice'; // Coordinator, Router, EndDevice
         const deviceClass = deviceType === 'Coordinator' ? 'coordinator' : 
                           deviceType === 'Router' ? 'router' : 'end-device';
@@ -611,8 +610,8 @@ class ZigbeeFloorplanCard extends HTMLElement {
         // Draw circle
         svgDevices.push(`
           <circle 
-            cx="${parseFloat(coords.x)}" 
-            cy="${parseFloat(coords.y)}" 
+            cx="${parseFloat(device.x)}" 
+            cy="${parseFloat(device.y)}" 
             r="${parseInt(this._config.circle_radius)}" 
             class="device-circle ${deviceClass} ${isSelected ? 'selected' : ''}" 
             data-ieee="${this._escapeHtml(String(ieeeAddr))}"
@@ -626,8 +625,8 @@ class ZigbeeFloorplanCard extends HTMLElement {
           const safeLabel = this._escapeHtml(String(label));
           svgDevices.push(`
             <text 
-              x="${parseFloat(coords.x)}" 
-              y="${parseFloat(coords.y) + parseInt(this._config.circle_radius) + 15}" 
+              x="${parseFloat(device.x)}" 
+              y="${parseFloat(device.y) + parseInt(this._config.circle_radius) + 15}" 
               class="device-label" 
               text-anchor="middle"
               style="pointer-events: none;"
@@ -641,9 +640,10 @@ class ZigbeeFloorplanCard extends HTMLElement {
   }
 
   getDeviceLabel(ieeeAddr, friendlyName) {
-    // Priority 1: Manual override from config
-    if (this._config.friendly_names && this._config.friendly_names[ieeeAddr]) {
-      return this._config.friendly_names[ieeeAddr];
+    // Priority 1: Name field in devices config
+    const device = this._config.devices && this._config.devices[ieeeAddr];
+    if (device && device.name) {
+      return device.name;
     }
     
     // Priority 2: Friendly name from Zigbee2MQTT network map

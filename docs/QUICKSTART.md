@@ -117,7 +117,7 @@ Example: `0x00124b001234abcd`
 type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
-device_coordinates:
+devices:
   "0x00124b001234abcd": { x: 500, y: 400 }  # Coordinator
   "0x00124b005678efgh": { x: 300, y: 200 }  # Living Room Light
   "0x00124b009abcdef0": { x: 700, y: 300 }  # Bedroom Sensor
@@ -146,7 +146,7 @@ Add these options to your card configuration:
 type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
-device_coordinates:
+devices:
   # ... your devices ...
 
 # Optional customization
@@ -175,7 +175,7 @@ Make your device names readable:
 - Check that sensor name is `sensor.zigbee2mqtt_networkmap`
 
 **No devices showing**
-- Check `device_coordinates` has correct IEEE addresses
+- Check `devices` has correct IEEE addresses
 - Verify coordinates are within image bounds
 
 **Device names show as codes**
