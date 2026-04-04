@@ -172,12 +172,11 @@ circle_radius: 10
 show_labels: true
 show_link_lqi: false  # Show LQI numbers on connections (default: false)
 mqtt_base_topic: zigbee2mqtt
-friendly_names:  # Optional overrides
-  '0xbc026efffe29c7de': 'Main Coordinator'
 devices:
   '0xbc026efffe29c7de':
     x: 500
     y: 400
+    name: 'Coordinator'
   '0x001788010d5caf75':
     x: 200
     y: 200
