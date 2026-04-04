@@ -138,7 +138,7 @@ Add this to your Lovelace dashboard:
 type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
-device_coordinates:
+devices:
   "0xbc026efffe29c7de": { x: 500, y: 400 }  # Coordinator
   "0x001788010d5caf75": { x: 200, y: 200 }  # Living Room Light
   # ... more devices
@@ -156,12 +156,10 @@ circle_radius: 10
 show_labels: true
 show_link_lqi: false
 mqtt_base_topic: zigbee2mqtt
-device_coordinates:
-  "0xbc026efffe29c7de": { x: 500, y: 400 }
-  "0x001788010d5caf75": { x: 200, y: 200 }
+devices:
+  "0xbc026efffe29c7de": { x: 500, y: 400, name: "Coordinator" }
+  "0x001788010d5caf75": { x: 200, y: 200, name: "Living Room Light" }
   "0x00158d0001a2b3c4": { x: 700, y: 300 }
-friendly_names:
-  "0x001788010d5caf75": "Living Room Light (Override)"
 ```
 
 See [configuration-example.yaml](examples/configuration-example.yaml) for more examples.
@@ -172,16 +170,13 @@ See [configuration-example.yaml](examples/configuration-example.yaml) for more e
 |--------|------|----------|---------|-------------|
 | `entity` | string | **Yes** | - | Entity ID of the MQTT network map sensor |
 | `image` | string | **Yes** | - | Path to floorplan image (e.g., `/local/floorplan.png`) |
-| `device_coordinates` | object | **Yes** | - | Map of IEEE addresses to x,y coordinates |
+| `devices` | object | **Yes** | - | Map of IEEE addresses to `x`, `y` coordinates and optional `name` override |
 | `image_width` | number | No | 1000 | Width of the floorplan image in pixels |
 | `image_height` | number | No | 800 | Height of the floorplan image in pixels |
 | `circle_radius` | number | No | 10 | Radius of device circles in pixels |
 | `show_labels` | boolean | No | true | Show device labels |
 | `show_link_lqi` | boolean | No | false | Show link quality values on connections |
 | `mqtt_base_topic` | string | No | zigbee2mqtt | Zigbee2MQTT MQTT base topic |
-| `friendly_names` | object | No | {} | Manual device name overrides |
-| `auto_friendly_names` | boolean | No | true | Automatically lookup friendly names from Home Assistant entities |
-| `friendly_names` | object | No | {} | Map of IEEE addresses to friendly names (overrides auto-lookup) |
 
 ## Getting Device IEEE Addresses
 
@@ -282,10 +277,13 @@ The card falls back to showing the last 4 characters of the IEEE address when it
 
 1. **Check browser console** (F12) - Look for `[Zigbee Floorplan]` messages
 2. **Verify entity attributes** - Go to Developer Tools → States, find your devices and check if they have `ieee_address` attribute
-3. **Try manual names** - Add the device to `friendly_names` configuration:
+3. **Try manual names** - Add a `name` field to the device entry in `devices`:
    ```yaml
-   friendly_names:
-     '0xbc026efffe29c7de': 'My Device Name'
+   devices:
+     '0xbc026efffe29c7de':
+       x: 500
+       y: 400
+       name: 'My Device Name'
    ```
 4. **Enable debug logging** - The console will show which devices were found and which weren't
 
@@ -305,35 +303,26 @@ The card falls back to showing the last 4 characters of the IEEE address when it
 
 ### Auto-Friendly Names
 
-By default, the card automatically looks up friendly names from Home Assistant entities. The lookup priority is:
+By default, the card automatically looks up friendly names from the Zigbee2MQTT network map data. The lookup priority is:
 
-1. **Manual override**: Names specified in `friendly_names` config
-2. **Entity attributes**: Searches for entities with matching `ieee_address` attribute
+1. **Name field in coordinates**: `name` specified alongside `x`/`y` in `devices`
+2. **Network map data**: Friendly name from Zigbee2MQTT included in the entity attributes
 3. **Fallback**: Last 4 characters of IEEE address
-
-To disable automatic lookup:
-```yaml
-auto_friendly_names: false
-```
 
 ### Manual Friendly Name Override
 
-You can manually specify names that will override the auto-lookup:
+You can specify a name per device directly in `devices`:
 
 ```yaml
-friendly_names:
-  '0xbc026efffe29c7de': 'Main Coordinator'  # Overrides auto-detected name
-  '0x001788010d5caf75': 'Living Room Plug'
-```
-
-### Dynamic Friendly Names
-
-You can use Home Assistant entity names as friendly names:
-
-```yaml
-friendly_names:
-  '0xbc026efffe29c7de': 'Coordinator'
-  '0x001788010d5caf75': '{{ states("sensor.living_room_router") }}'
+devices:
+  '0xbc026efffe29c7de':
+    x: 500
+    y: 400
+    name: 'Main Coordinator'
+  '0x001788010d5caf75':
+    x: 200
+    y: 200
+    name: 'Living Room Plug'
 ```
 
 ### Multiple Floors
@@ -345,13 +334,13 @@ Create separate cards for each floor with different floorplan images:
   entity: sensor.zigbee_coordinator_networkmap
   image: /local/floor1.png
   title: First Floor
-  device_coordinates: { ... }
+  devices: { ... }
 
 - type: custom:zigbee-floorplan-card
   entity: sensor.zigbee_coordinator_networkmap
   image: /local/floor2.png
   title: Second Floor
-  device_coordinates: { ... }
+  devices: { ... }
 ```
 
 ### Custom Styling

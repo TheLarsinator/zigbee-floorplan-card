@@ -295,7 +295,7 @@ show_link_lqi: false
 mqtt_base_topic: zigbee2mqtt
 
 # Device coordinates
-device_coordinates:\n`;
+devices:\n`;
             devices.forEach(d => {
                 yaml += `  '${d.address}':\n    x: ${d.x}\n    y: ${d.y}\n`;
             });

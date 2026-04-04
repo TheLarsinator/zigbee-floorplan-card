@@ -126,7 +126,7 @@ Update your card configuration to use the new sensor:
 type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap  # The MQTT sensor
 image: /local/floorplan.png
-device_coordinates:
+devices:
   "0x00124b001234abcd": { x: 500, y: 400 }  # Coordinator
   "0x00124b005678efgh": { x: 300, y: 200 }  # Living Room Light
   # Add more devices...
@@ -143,7 +143,7 @@ type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
 mqtt_base_topic: my_custom_topic  # Default is 'zigbee2mqtt'
-device_coordinates:
+devices:
   # ...
 ```
 
@@ -155,7 +155,7 @@ You can still override individual device names:
 type: custom:zigbee-floorplan-card
 entity: sensor.zigbee2mqtt_networkmap
 image: /local/floorplan.png
-device_coordinates:
+devices:
   # ...
 friendly_names:
   "0x00124b005678efgh": "My Custom Name"  # Override the Z2M name
