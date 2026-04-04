@@ -35,6 +35,35 @@ This card uses MQTT to get the complete network map from Zigbee2MQTT, including 
 - ✅ Single source of truth (Zigbee2MQTT)
 - ✅ Accurate device types and network topology
 
+## Alternative Integrations
+
+The card is not limited to Zigbee2MQTT. Any integration that can provide a sensor with `nodes` and `links` attributes in the expected format is supported. The following integrations are documented:
+
+### ZHA (Zigbee Home Automation)
+
+ZHA is the built-in Zigbee integration in Home Assistant. To use the card with ZHA you need:
+
+1. The [zha_toolkit](https://github.com/mdeweerd/zha-toolkit) HACS integration to retrieve device topology
+2. A template sensor that listens for the `zha_device_list` event
+3. An automation that fires the event on a schedule
+
+Device identifiers in `device_coordinates` use **IEEE addresses** (e.g., `"0x00158d0001a2b3c4"`), the same format as Zigbee2MQTT.
+
+See **[docs/ZHA-SETUP.md](docs/ZHA-SETUP.md)** for the full setup guide, including the template sensor and automation configuration.
+
+### Z-Wave (Z-Wave JS)
+
+The card can also visualize Z-Wave mesh networks by reading routing topology from the Z-Wave JS integration. To use the card with Z-Wave you need:
+
+1. The [pyscript](https://github.com/custom-components/pyscript) HACS integration to read Z-Wave JS controller data
+2. A pyscript service that fires a `zwave_device_list` event with nodes and links
+3. A template sensor that listens for the event
+4. An automation that calls the service on startup and on a schedule
+
+Device identifiers in `device_coordinates` use **node IDs as strings** (e.g., `"1"`, `"5"`, `"12"`).
+
+See **[docs/ZWAVE-SETUP.md](docs/ZWAVE-SETUP.md)** for the full setup guide, including the pyscript service, template sensor, and automation configuration.
+
 ## Quick Start
 
 See [QUICKSTART.md](docs/QUICKSTART.md) for a step-by-step guide to get started!
